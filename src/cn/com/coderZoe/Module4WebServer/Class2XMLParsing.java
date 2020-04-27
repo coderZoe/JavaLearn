@@ -1,16 +1,19 @@
 package cn.com.coderZoe.Module4WebServer;
 
 import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.io.SAXReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.print.Doc;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.*;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -44,36 +47,7 @@ public class Class2XMLParsing {
     * sax解析：
     * sax是一种推式的机制,你创建一个sax 解析器,解析器在发现xml文档中的内容时就告诉你(把事件推给你). 如何处理这些内容，由程序员自己决定
     * 具体来说就是解析器一点点不断的解析 解析到一个节点 就会触发一个函数 这个函数是接口定好的，你需要根据自己的需求来实现，这个接口实现类叫事件处理器
-    * 事件处理器实现接口的函数
-    * //开始解析
-    * @Override
-    * public void startDocument() throws SAXException {
-    *    super.startDocument();
-    * }
-    *
-    * //结束解析
-    * @Override
-    * public void endDocument() throws SAXException {
-    *     super.endDocument();
-    * }
-    *
-    * //遇到开始标签
-    * @Override
-    * public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-    *    super.startElement(uri, localName, qName, attributes);
-    * }
-    *
-    * //遇到结束标签
-    * @Override
-    * public void endElement(String uri, String localName, String qName) throws SAXException {
-    *     super.endElement(uri, localName, qName);
-    * }
-    *
-    * //遇到内容
-    * @Override
-    * public void characters(char[] ch, int start, int length) throws SAXException {
-    *     super.characters(ch, start, length);
-    * }
+    * 事件处理器继承父类DefaultHandler
     *
     * dom4j dom的问题在于太吃内存，而sax的问题在于无法CRUD 只能读取
     *
@@ -82,6 +56,7 @@ public class Class2XMLParsing {
 
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, TransformerException {
         DomTest.opDom("op.xml");
+        SaxTest.opSax();
     }
 }
 
@@ -188,7 +163,7 @@ class DomTest{
      * @data: 2020/04/26 23:31
      * @author: yhs
      * @return:
-     * @description:
+     * @description: 删除某个具体的节点
      */
     public static void delete(Document document,String nodeName){
         Node node = document.getElementsByTagName(nodeName).item(0);
@@ -208,5 +183,125 @@ class DomTest{
     public static void modify(Document document,String nodeName,String textContent){
         Node node = document.getElementsByTagName(nodeName).item(0);
         node.setTextContent(textContent);
+    }
+}
+
+/**
+ * @data: 2020/04/27 08:51
+ * @author: yhs
+ * @description: 通过sax解析XML
+ */
+class SaxTest{
+    public static void opSax() throws ParserConfigurationException, SAXException, IOException {
+        //step1:获得解析器的构造工厂
+        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+        //step2:通过构造工厂得到解析器对象
+        SAXParser saxParser = saxParserFactory.newSAXParser();
+        //解析
+        saxParser.parse(new File("op.xml"),new MyHandler());
+    }
+}
+
+/**
+ * @data: 2020/04/27 09:01
+ * @author: yhs
+ * @description: 事件处理器 用于响应sax解析
+ */
+class MyHandler extends DefaultHandler{
+
+    //开始解析
+    @Override
+    public void startDocument() throws SAXException {
+        System.out.println("我要开始解析啦！");
+    }
+
+    //结束解析
+    @Override
+    public void endDocument() throws SAXException {
+        System.out.println("我得解析结束啦！！");
+    }
+
+    //遇到标签
+    @Override
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        System.out.println("我是开始标签<"+qName+">");
+    }
+
+    //结束标签
+
+    @Override
+    public void endElement(String uri, String localName, String qName) throws SAXException {
+        System.out.println("我是结束标签</"+qName+">");
+    }
+
+    //遇到内容文本
+
+    @Override
+    public void characters(char[] ch, int start, int length) throws SAXException {
+        System.out.println(new String(ch,start,length));
+    }
+}
+
+/**
+ * @data: 2020/04/27 09:04
+ * @author: yhs
+ * @description:
+ */
+class Dom4jTest{
+    public static void opDom4j() throws DocumentException {
+
+        //解析得到xml的document
+        SAXReader reader = new SAXReader();
+        org.dom4j.Document document = reader.read(new File("op.xml"));  //可以看到这里的document改变了
+
+        //查询
+        Dom4jTest.query(document,"beijing");
+    }
+
+    /**
+     * @param document 文档
+     * @param nodeName 节点名称
+     * @data: 2020/04/27 09:19
+     * @author: yhs
+     * @return:
+     * @description: dom4j的查询
+     */
+    public static void query(org.dom4j.Document document,String nodeName){
+        org.dom4j.Element rootElement = document.getRootElement();
+        org.dom4j.Element element = rootElement.element(nodeName);
+        String context = element.getText();
+        System.out.println("标签名:"+element.getName()+"内容:"+context);
+    }
+
+    /**
+     * @param document    文档
+     * @param nodeName    节点名称
+     * @param contentText 内容的文本
+     * @data: 2020/04/27 09:21
+     * @author: yhs
+     * @return:
+     * @description: dom4j增加节点
+     */
+    public static void add(org.dom4j.Document document,String nodeName,String contentText){
+
+        //创建新元素
+        org.dom4j.Element newElement = DocumentHelper.createElement(nodeName);
+        newElement.setText(contentText);
+
+        //获得根节点 将新元素挂在根节点下面
+        org.dom4j.Element rootElement = document.getRootElement();
+        rootElement.add(newElement);
+    }
+
+    /**
+     * @param document 文档
+     * @param nodeName 节点名称
+     * @data: 2020/04/27 09:27
+     * @author: yhs
+     * @return:
+     * @description: dom4j删除节点
+     */
+    public static void delete(org.dom4j.Document document,String nodeName){
+
     }
 }
