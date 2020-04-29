@@ -3,7 +3,9 @@ package cn.com.coderZoe.Module4WebServer;
 import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
+import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,10 +22,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * @author yhs
@@ -54,9 +53,10 @@ public class Class2XMLParsing {
     *
      */
 
-    public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, TransformerException {
+    public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, TransformerException, DocumentException {
         DomTest.opDom("op.xml");
         SaxTest.opSax();
+        Dom4jTest.opDom4j();
     }
 }
 
@@ -124,7 +124,7 @@ class DomTest{
      * @return:
      * @description: 查询某个具体的节点
      */
-    public static void query(Document document,String nodeName){
+    private static void query(Document document,String nodeName){
         NodeList nodeList = document.getElementsByTagName(nodeName);
         for(int i = 0; i < nodeList.getLength(); i++){
             System.out.println(nodeList.item(i).getTextContent());
@@ -138,7 +138,7 @@ class DomTest{
      * @return:
      * @description: 在某个节点内增加(或插入)另一个节点
      */
-    public static void add(Document document){
+    private static void add(Document document){
         //创建节点
         Element element = document.createElement("henan");
         element.setTextContent("河南");
@@ -165,7 +165,7 @@ class DomTest{
      * @return:
      * @description: 删除某个具体的节点
      */
-    public static void delete(Document document,String nodeName){
+    private static void delete(Document document,String nodeName){
         Node node = document.getElementsByTagName(nodeName).item(0);
         node.getParentNode().removeChild(node);
         traverse(document);
@@ -180,7 +180,7 @@ class DomTest{
      * @return:
      * @description: 修改节点文本内容
      */
-    public static void modify(Document document,String nodeName,String textContent){
+    private static void modify(Document document,String nodeName,String textContent){
         Node node = document.getElementsByTagName(nodeName).item(0);
         node.setTextContent(textContent);
     }
@@ -248,7 +248,7 @@ class MyHandler extends DefaultHandler{
  * @description:
  */
 class Dom4jTest{
-    public static void opDom4j() throws DocumentException {
+    public static void opDom4j() throws DocumentException, IOException {
 
         //解析得到xml的document
         SAXReader reader = new SAXReader();
@@ -256,6 +256,17 @@ class Dom4jTest{
 
         //查询
         Dom4jTest.query(document,"beijing");
+        //增加
+        Dom4jTest.add(document,"tianjin","天津");
+        //删除
+        Dom4jTest.delete(document,"shanghai");
+
+        //保存
+        OutputFormat outputFormat = OutputFormat.createPrettyPrint();
+        outputFormat.setEncoding("UTF-8");
+        XMLWriter xmlWriter = new XMLWriter(new FileWriter("result2.xml"),outputFormat);
+        xmlWriter.write(document);
+        xmlWriter.close();
     }
 
     /**
@@ -266,7 +277,7 @@ class Dom4jTest{
      * @return:
      * @description: dom4j的查询
      */
-    public static void query(org.dom4j.Document document,String nodeName){
+    private static void query(org.dom4j.Document document,String nodeName){
         org.dom4j.Element rootElement = document.getRootElement();
         org.dom4j.Element element = rootElement.element(nodeName);
         String context = element.getText();
@@ -282,7 +293,7 @@ class Dom4jTest{
      * @return:
      * @description: dom4j增加节点
      */
-    public static void add(org.dom4j.Document document,String nodeName,String contentText){
+    private static void add(org.dom4j.Document document,String nodeName,String contentText){
 
         //创建新元素
         org.dom4j.Element newElement = DocumentHelper.createElement(nodeName);
@@ -301,7 +312,10 @@ class Dom4jTest{
      * @return:
      * @description: dom4j删除节点
      */
-    public static void delete(org.dom4j.Document document,String nodeName){
+    private static void delete(org.dom4j.Document document,String nodeName){
+        org.dom4j.Element rootElement = document.getRootElement();
+        org.dom4j.Element element = rootElement.element(nodeName);
+        element.getParent().remove(element);
 
     }
 }
