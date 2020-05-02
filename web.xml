@@ -6,7 +6,7 @@
 
     <servlet>
         <servlet-name>servlet1</servlet-name>
-        <servlet-class>class1</servlet-class>
+        <servlet-class>cn.com.coderZoe.Module4WebServer.Class4Servlet1</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>servlet1</servlet-name>
@@ -16,7 +16,7 @@
 
     <servlet>
         <servlet-name>servlet2</servlet-name>
-        <servlet-class>class2</servlet-class>
+        <servlet-class>cn.com.coderZoe.Module4WebServer.Class4Servlet2</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>servlet2</servlet-name>

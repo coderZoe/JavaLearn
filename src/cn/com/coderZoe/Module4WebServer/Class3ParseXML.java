@@ -133,10 +133,7 @@ class SaxHandler extends DefaultHandler{
 
     @Override
     public void endDocument() throws SAXException {
-        System.out.println("结束");
-        for(Servlet servlet:servletList){
-            System.out.println(servlet.toString());
-        }
+        new Class4ServletMap(servletList);
     }
 
     @Override
