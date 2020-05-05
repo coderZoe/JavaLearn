@@ -29,6 +29,7 @@ public class Class2Batch {
         }
         //执行
         statement.executeBatch();
+        statement.clearBatch();
         //提交事务
         connection.commit();
     }

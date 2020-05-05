@@ -10,7 +10,7 @@ import java.sql.*;
 public class Class1JDBC {
 
     /**
-     * Java DataBase Connection Java数据库连接
+     * Java Data Base Connectivity Java数据库连接
      * Sun公司提供一组接口 具体的实现由具体的产商来实现 数据库厂商的实现类一般叫做数据库驱动
      *
      * JDBC访问数据库流程:
